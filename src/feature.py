@@ -200,7 +200,7 @@ def main():
                 row_list.append(row_index)
                 column_list.append(len(word_idf_dict) + column_index)
                 value_list.append(content_feature_dict[column_index])
-            if len(content_feature_dict) + len(content_feature_dict) == 0:
+            if len(title_feature_dict) + len(content_feature_dict) == 0:
                 row_list.append(row_index)
                 column_list.append(0)
                 value_list.append(0.0)
