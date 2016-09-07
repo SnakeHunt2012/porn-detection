@@ -150,23 +150,6 @@ def main():
             content_seg_list = [seg.encode("utf-8") for seg in cut(content)]
             title_seg_list = [seg.encode("utf-8") for seg in cut(title)]
 
-            #word_tf_dict = {}
-            ## content -> word_tf_dict
-            #for word in content_seg_list: # word -> term count
-            #    if word not in word_tf_dict:
-            #        word_tf_dict[word] = 0
-            #    word_tf_dict[word] += 1
-            ## title -> word_tf_dict
-            #for word in title_seg_list: # word -> term count
-            #    if word not in word_tf_dict:
-            #        word_tf_dict[word] = 0
-            #    word_tf_dict[word] += 10
-            ## tc -> tf
-            #term_count = sum(word_tf_dict.itervalues())
-            #if term_count > 0: # word -> term frequency
-            #    for word in word_tf_dict:
-            #        word_tf_dict[word] /= float(term_count)
-
             title_word_tf_dict = {}
             # title -> title_word_tf_dict
             for word in title_seg_list: # word -> term count
@@ -191,15 +174,6 @@ def main():
                 for word in content_word_tf_dict:
                     content_word_tf_dict[word] /= float(term_count)
                 
-            #feature_dict = {}
-            #for word in word_tf_dict:
-            #    if (word in word_idf_dict) and (word in word_index_dict):
-            #        feature_dict[word_index_dict[word]] = word_tf_dict[word] * word_idf_dict[word]
-            #if len(feature_dict) > 0:
-            #    feature_norm = norm([value for key, value in feature_dict.iteritems()])
-            #    for word in feature_dict:
-            #        feature_dict[word] /= feature_norm
-
             title_feature_dict = {}
             for word in title_word_tf_dict:
                 if (word in word_idf_dict) and (word in word_index_dict):
