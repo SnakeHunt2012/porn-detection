@@ -103,8 +103,8 @@ def main():
     word_idf_dict, word_index_dict = load_template_dict(template_file)
     netloc_index_dict, index_netloc_dict = load_netloc_dict(netloc_file)
 
-    for word in word_idf_dict:
-        add_word(word)
+    #for word in word_idf_dict:
+    #    add_word(word)
     
     url_list = []
     label_list = []
@@ -150,37 +150,83 @@ def main():
             content_seg_list = [seg.encode("utf-8") for seg in cut(content)]
             title_seg_list = [seg.encode("utf-8") for seg in cut(title)]
 
-            word_tf_dict = {}
-            # content -> word_tf_dict
-            for word in content_seg_list: # word -> term count
-                if word not in word_tf_dict:
-                    word_tf_dict[word] = 0
-                word_tf_dict[word] += 1
-            # title -> word_tf_dict
-            for word in title_seg_list: # word -> term count
-                if word not in word_tf_dict:
-                    word_tf_dict[word] = 0
-                word_tf_dict[word] += 10
-            # tc -> tf
-            term_count = sum(word_tf_dict.itervalues())
-            if term_count > 0: # word -> term frequency
-                for word in word_tf_dict:
-                    word_tf_dict[word] /= float(term_count)
-                
-            feature_dict = {}
-            for word in word_tf_dict:
-                if (word in word_idf_dict) and (word in word_index_dict):
-                    feature_dict[word_index_dict[word]] = word_tf_dict[word] * word_idf_dict[word]
-            if len(feature_dict) > 0:
-                feature_norm = norm([value for key, value in feature_dict.iteritems()])
-                for word in feature_dict:
-                    feature_dict[word] /= feature_norm
+            #word_tf_dict = {}
+            ## content -> word_tf_dict
+            #for word in content_seg_list: # word -> term count
+            #    if word not in word_tf_dict:
+            #        word_tf_dict[word] = 0
+            #    word_tf_dict[word] += 1
+            ## title -> word_tf_dict
+            #for word in title_seg_list: # word -> term count
+            #    if word not in word_tf_dict:
+            #        word_tf_dict[word] = 0
+            #    word_tf_dict[word] += 10
+            ## tc -> tf
+            #term_count = sum(word_tf_dict.itervalues())
+            #if term_count > 0: # word -> term frequency
+            #    for word in word_tf_dict:
+            #        word_tf_dict[word] /= float(term_count)
 
-            for column_index in feature_dict:
+            title_word_tf_dict = {}
+            # title -> title_word_tf_dict
+            for word in title_seg_list: # word -> term count
+                if word not in title_word_tf_dict:
+                    title_word_tf_dict[word] = 0
+                title_word_tf_dict[word] += 10
+            # tc -> tf
+            term_count = sum(title_word_tf_dict.itervalues())
+            if term_count > 0: # word -> term frequency
+                for word in title_word_tf_dict:
+                    title_word_tf_dict[word] /= float(term_count)
+                    
+            content_word_tf_dict = {}
+            # content -> content_word_tf_dict
+            for word in content_seg_list: # word -> term count
+                if word not in content_word_tf_dict:
+                    content_word_tf_dict[word] = 0
+                content_word_tf_dict[word] += 1
+            # tc -> tf
+            term_count = sum(content_word_tf_dict.itervalues())
+            if term_count > 0: # word -> term frequency
+                for word in content_word_tf_dict:
+                    content_word_tf_dict[word] /= float(term_count)
+                
+            #feature_dict = {}
+            #for word in word_tf_dict:
+            #    if (word in word_idf_dict) and (word in word_index_dict):
+            #        feature_dict[word_index_dict[word]] = word_tf_dict[word] * word_idf_dict[word]
+            #if len(feature_dict) > 0:
+            #    feature_norm = norm([value for key, value in feature_dict.iteritems()])
+            #    for word in feature_dict:
+            #        feature_dict[word] /= feature_norm
+
+            title_feature_dict = {}
+            for word in title_word_tf_dict:
+                if (word in word_idf_dict) and (word in word_index_dict):
+                    title_feature_dict[word_index_dict[word]] = title_word_tf_dict[word] * word_idf_dict[word]
+            if len(title_feature_dict) > 0:
+                feature_norm = norm([value for key, value in title_feature_dict.iteritems()])
+                for word in title_feature_dict:
+                    title_feature_dict[word] /= feature_norm
+
+            content_feature_dict = {}
+            for word in content_word_tf_dict:
+                if (word in word_idf_dict) and (word in word_index_dict):
+                    content_feature_dict[word_index_dict[word]] = content_word_tf_dict[word] * word_idf_dict[word]
+            if len(content_feature_dict) > 0:
+                feature_norm = norm([value for key, value in content_feature_dict.iteritems()])
+                for word in content_feature_dict:
+                    content_feature_dict[word] /= feature_norm
+
+            for column_index in title_feature_dict:
                 row_list.append(row_index)
                 column_list.append(column_index)
-                value_list.append(feature_dict[column_index])
-            if len(feature_dict) == 0:
+                value_list.append(title_feature_dict[column_index])
+            for column_index in content_feature_dict:
+                row_list.append(row_index)
+                column_list.append(len(word_idf_dict) + column_index)
+                value_list.append(content_feature_dict[column_index])
+            if len(content_feature_dict) + len(content_feature_dict) == 0:
                 row_list.append(row_index)
                 column_list.append(0)
                 value_list.append(0.0)
@@ -188,7 +234,7 @@ def main():
                 netloc = urlparse(url).netloc
                 if netloc in netloc_index_dict:
                     row_list.append(row_index)
-                    column_list.append(len(feature_dict) + netloc_index_dict[netloc])
+                    column_list.append(len(word_idf_dict) + len(word_idf_dict) + netloc_index_dict[netloc])
                     value_list.append(1)
                     
             url_list.append(url)
@@ -198,7 +244,10 @@ def main():
             #print "%s\t%d\t%f\t%f\t%d" % (url, len(word_tf_dict), feature_norm, value_list[-1], label)
         assert len(url_list) == len(label_list) == len(set(row_list))
             
-    feature_matrix = coo_matrix((value_list, (row_list, column_list)), shape=(len(url_list), len(word_index_dict)))
+    if netloc_file is not None:
+        feature_matrix = coo_matrix((value_list, (row_list, column_list)), shape=(len(url_list), len(word_index_dict) + len(word_index_dict) + len(netloc_index_dict)))
+    else:
+        feature_matrix = coo_matrix((value_list, (row_list, column_list)), shape=(len(url_list), len(word_index_dict) + len(word_index_dict)))
 
     with open(data_file, "wb") as fd:
         dump({"url_list": url_list, "label_list": label_list, "feature_matrix": feature_matrix}, fd)
