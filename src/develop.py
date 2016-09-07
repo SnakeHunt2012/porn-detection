@@ -75,7 +75,7 @@ def main():
         learning_rate=0.1,
         n_estimators=1000,
         subsample=1.0,
-        min_samples_split=10,
+        min_samples_split=5,
         min_samples_leaf=5,
         min_weight_fraction_leaf=0.0,
         max_depth=20,
